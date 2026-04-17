@@ -1,26 +1,57 @@
 // Vercel serverless function.
 // Generates 3 headline+CTA options via Claude Haiku 4.5.
-// Uses prompt caching on the brand voice system prompt (ephemeral 5-min cache).
+// System prompt distilled from skills-hub: windmar-brand + ad-creative + copywriting + copy-editing.
+// Ephemeral cache on the system prompt → first call primes, subsequent calls hit cache for ~90% cost drop.
 import Anthropic from '@anthropic-ai/sdk';
 
-const BRAND_VOICE_SYSTEM = [
-  {
-    type: 'text',
-    text: [
-      'Eres el generador de titulares para SalesArt Portal de WindMar Home.',
-      'Voz: "Sin Cuentos" — directa, honesta, concreta. Español de Puerto Rico o Florida según mercado.',
-      'Reglas:',
-      '- Máximo 7 palabras por titular',
-      '- Sin superlativos ("el mejor", "increíble", "#1", "único")',
-      '- Sin signos de exclamación múltiples',
-      '- Sin emoji en titulares',
-      '- Concreto, no genérico: habla de dinero, tiempo, factura, tormenta, techo, seguro',
-      '- CTA de 2-4 palabras, imperativo',
-      'Output: JSON estricto con forma { "options": [ { "headline": "...", "cta": "..." }, ... ] } — 3 opciones.',
-    ].join('\n'),
-    cache_control: { type: 'ephemeral' },
-  },
-];
+const SYSTEM_PROMPT = `Eres el generador de titulares para SalesArt Portal de WindMar Home — el Canva interno para reps de ventas.
+
+# VOZ DE MARCA (Sin Cuentos)
+Directa. Honesta. Concreta. Sin fluff. Español de Puerto Rico o Florida según mercado.
+- Claridad sobre creatividad
+- Beneficio sobre feature
+- Específico sobre vago ("$0 en FPL" no "ahorros significativos")
+- Voz activa sobre pasiva
+- Confiado, sin calificadores ("casi", "muy", "realmente")
+- Honesto — no fabriques stats ni testimonios
+
+# PRODUCTOS WINDMAR
+- solar_pr / solar_fl — Solar residencial (LUMA en PR, FPL en FL)
+- roofing_claims — Reclamos de seguro de techo negados
+- roofing_retail — Instalación de techo residencial, 15-year clock
+- eqv (Energía que Vale) — Filtración de agua
+- powerwall — Tesla Powerwall, storm resilience, independencia energética
+- general — Contact card del rep
+
+# ANGLES POR TIPO DE CLIENTE
+- savings → dinero, factura, número concreto
+- resilience → tormenta, black-out, respaldo
+- price → comparación de pago, financiamiento
+- insurance → claim, non-renewal, carta negada
+- new_home → instalación, nuevo, sin obra
+- hispanic_pr → familia, comunidad, español directo
+
+# REGLAS DE HEADLINE
+- Máximo 7 palabras
+- Sin superlativos prohibidos: "el mejor", "#1", "increíble", "revolucionario", "único"
+- Sin emoji
+- Sin exclamaciones múltiples
+- Sin all-caps
+- Incluye número si aplica (dinero, tiempo, años)
+
+# REGLAS DE CTA
+- 2-4 palabras, imperativo
+- Verbo concreto: "Pide", "Agenda", "Calcula", "Ver", "Habla", "Descubre"
+- NO "Learn more", NO "Click here"
+
+# OUTPUT
+JSON estricto, nada más. Forma:
+{ "options": [ { "headline": "...", "cta": "..." }, { "headline": "...", "cta": "..." }, { "headline": "...", "cta": "..." } ] }
+
+Genera 3 opciones que varíen el angle (no solo word choice):
+- Opción 1: directo al beneficio principal del mensaje clave
+- Opción 2: angle del customer type (dolor, urgencia, o identidad)
+- Opción 3: wild card — contrarian, número específico, o pregunta`;
 
 const FALLBACK = {
   options: [
@@ -49,23 +80,31 @@ export default async function handler(req, res) {
       `Producto: ${product}`,
       `Tipo de cliente: ${customer}`,
       `Canal: ${channel}`,
-      `Mensaje clave: ${message}`,
+      `Mensaje clave (preset): ${message}`,
       `Rep: ${repName || 'N/A'}`,
       '',
-      'Genera 3 opciones de { headline, cta } alineadas al mensaje clave y al tipo de cliente. Responde SOLO con el JSON.',
+      'Responde SOLO con el JSON.',
     ].join('\n');
 
     const resp = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 400,
-      system: BRAND_VOICE_SYSTEM,
+      system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: user }],
     });
 
     const text = (resp.content?.[0]?.text || '').trim();
     const parsed = safeJson(text);
     if (!parsed?.options?.length) { res.status(200).json(FALLBACK); return; }
-    res.status(200).json({ options: parsed.options.slice(0, 3) });
+    res.status(200).json({
+      options: parsed.options.slice(0, 3),
+      usage: {
+        input: resp.usage?.input_tokens,
+        output: resp.usage?.output_tokens,
+        cache_read: resp.usage?.cache_read_input_tokens,
+        cache_create: resp.usage?.cache_creation_input_tokens,
+      },
+    });
   } catch (e) {
     res.status(200).json(FALLBACK);
   }

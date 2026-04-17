@@ -1,11 +1,28 @@
+/*
+ * WindMar Home brand tokens.
+ * Source: skills-hub/windmar-brand.skill (extracted from
+ * ~/Library/CloudStorage/OneDrive-WindMarGroup/BrandGuidelines/WMH_Brand_Guidelines.pdf)
+ * Extended tokens (dark, darker, cream, muted) match the pattern used in
+ * Windmar-Home/fl-solar-levantamiento and the other recent workshop landings.
+ */
 :root {
-  --wh-blue: #1D429B;
-  --wh-blue-dark: #21366B;
+  /* Primary */
+  --wh-blue:       #1D429B;
+  --wh-orange:     #F89B24;
+
+  /* Secondary */
+  --wh-blue-dark:  #21366B;
   --wh-blue-light: #A6C3E6;
-  --wh-orange: #F89B24;
-  --wh-grey: #666666;
-  --white: #FFFFFF;
-  --dark: #060A0F;
+  --wh-grey:       #666666;
+
+  /* Extended (landing-page pattern) */
+  --wh-dark:       #0A1228;
+  --wh-darker:     #060E1F;
+  --wh-cream:      #F5F7FA;
+  --wh-muted:      #4A5C72;
+
+  --white:         #FFFFFF;
+  --dark:          #060A0F;
 
   --font: 'Montserrat', system-ui, sans-serif;
 }
@@ -23,9 +40,20 @@ html, body, #root {
   background: var(--white);
 }
 
-.wh-headline { font-weight: 900; letter-spacing: -0.01em; line-height: 1.05; }
-.wh-body     { font-weight: 400; line-height: 1.4; }
+.wh-headline {
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+}
+.wh-subhead  { font-weight: 700; letter-spacing: -0.01em; line-height: 1.1; }
+.wh-body     { font-weight: 400; line-height: 1.5; }
 .wh-emphasis { font-weight: 600; }
+.wh-eyebrow  {
+  font-weight: 900;
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
 
 .wh-btn {
   font-family: var(--font);
