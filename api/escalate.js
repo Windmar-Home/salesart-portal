@@ -58,11 +58,12 @@ export default async function handler(req, res) {
   if (!url) { res.status(500).json({ error: 'no_webhook' }); return; }
 
   try {
+    // Align with windmar-home/teams-n8n-bridge (homie) auth pattern: X-Auth-Token
     const r = await fetch(url, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        ...(process.env.N8N_WEBHOOK_SECRET ? { 'x-webhook-secret': process.env.N8N_WEBHOOK_SECRET } : {}),
+        ...(process.env.N8N_AUTH_TOKEN ? { 'x-auth-token': process.env.N8N_AUTH_TOKEN } : {}),
       },
       body: JSON.stringify(payload),
     });
