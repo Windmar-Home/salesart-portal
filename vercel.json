@@ -1,8 +1,5 @@
 {
   "framework": "vite",
   "buildCommand": "vite build",
-  "outputDirectory": "dist",
-  "functions": {
-    "api/*.js": { "runtime": "nodejs20.x" }
-  }
+  "outputDirectory": "dist"
 }
