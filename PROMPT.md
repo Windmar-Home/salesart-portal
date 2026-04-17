@@ -61,6 +61,35 @@ Deploy ALL agents to build this portal. Each owns a specific piece:
 
 ---
 
+
+---
+
+## ATLAS BRAIN SKILLS (already installed in your Claude Code)
+All skills from ~/Atlas/Brain/AI/skills/ are already installed in ~/.claude/agents/skills/ and ~/.claude/skills/
+Use them directly. They are indexed in your knowledge base.
+
+**Key skills to use for this build:**
+- `windmar-brand` — WMH brand colors, fonts, logo rules (CRITICAL)
+- `ad-creative` — generate headlines and ad copy at scale
+- `copywriting` — one-pager and sales copy
+- `copy-editing` — brand voice consistency check
+- `customer-research` — customer personas and targeting logic
+- `sales-enablement` — what reps need, what to lock down
+- `content-strategy` — template content planning
+- `onboarding-cro` — optimize the 4-question intake UX flow
+- `prd-taskmaster` — generate PRD + break into tasks + execute
+- `launch-strategy` — rollout plan for the portal
+- `marketing-psychology` — why certain copy converts
+
+**How to access them:**
+```
+read ~/.claude/agents/skills/windmar-brand/SKILL.md
+read ~/.claude/agents/skills/ad-creative/SKILL.md
+read ~/.claude/skills/prd-taskmaster/SKILL.md
+```
+
+All 93 skills are available. Use all the relevant ones — this should be the most skill-powered build we've done.
+
 ## PRD TASKMASTER INTEGRATION
 Use `prd-taskmaster` skill to:
 1. Generate full technical PRD for this project before building
